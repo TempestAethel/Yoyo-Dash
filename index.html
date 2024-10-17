@@ -41,7 +41,7 @@
 
         .scoreboard {
             position: absolute;
-            top: 120px; /* Adjusted position */
+            bottom: 30px; /* Position at the bottom */
             text-align: center;
             z-index: 10;
         }
@@ -51,7 +51,7 @@
             font-family: 'Malgun Gothic', sans-serif;
             text-align: center;
             text-shadow: 0 0 20px rgba(255, 171, 0, 0.8), 0 0 30px rgba(255, 171, 0, 0.6);
-            margin: 0;
+            margin: 5px 0; /* Slightly adjust margin */
         }
 
         .score {
@@ -75,6 +75,7 @@
     <h1>Yoyo Dash</h1>
     <div class="scoreboard" id="scoreboard">
         <p>Score: <span id="scoreDisplay">0</span></p>
+        <p>Wall Collisions: <span id="wallCollisions">0</span></p>
         <p class="score" id="highScoreDisplay">High Score: <span id="highScore">0</span></p>
     </div>
     <canvas id="canvas"></canvas>
@@ -95,16 +96,17 @@
             var bounce = 0.8, friction = 0.99;
             var collisionCount = 0, wallCollisionCount = 0;
             var dots = [];
-            var numDots = 5; // Number of neon green dots
+            var numDots = 0; // Start with no dots
             var score = 0;
+            var dotInterval;
 
             // Load high score from local storage
             var highScore = localStorage.getItem('highScore') || 0;
             document.getElementById("highScore").innerText = highScore;
 
             // Function to spawn random dots
-            function spawnDots() {
-                for (var i = 0; i < numDots; i++) {
+            function spawnDot() {
+                if (dots.length < 10) { // Limit to 10 dots on the canvas
                     dots.push({
                         x: Math.random() * (width - radius * 2) + radius,
                         y: Math.random() * (height - radius * 2) + radius,
@@ -113,8 +115,7 @@
                 }
             }
 
-            // Initial dot spawning
-            spawnDots();
+            dotInterval = setInterval(spawnDot, 2000); // Spawn a dot every 2 seconds
 
             var myVar = setInterval(animation, 20);
 
@@ -141,9 +142,9 @@
                 centerX1 += velocityX1;
                 centerY1 += velocityY1;
 
-                // Check for collision with the blue ball
+                // Check for collision with the target ball
                 if (Math.sqrt(Math.pow(centerX1 - centerX2, 2) + Math.pow(centerY1 - centerY2, 2)) < radius * 2) {
-                    collisionCount += 10; // Score 10 for hitting the blue ball
+                    score += 10; // Score 10 for hitting the target ball
                     centerX2 = Math.random() * (width - radius * 2) + radius;
                     centerY2 = Math.random() * (height - radius * 2) + radius;
                 }
@@ -206,6 +207,7 @@
 
                 // Update statistics on the screen
                 document.getElementById("scoreDisplay").innerText = score; // Show score
+                document.getElementById("wallCollisions").innerText = wallCollisionCount; // Update wall collision count
             }
 
             var mouseX = width / 2; // Initialize mouseX
@@ -218,25 +220,28 @@
                 gravityY1 = ((mouseY - height / 2) / (height / 2)) / 2;
             });
 
-            // Reset game on key press 'R' or 'r'
+            // Handle reset on 'R' key press
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'r' || e.key === 'R') {
-                    resetGame(); // Reset the game if 'R' or 'r' is pressed
+                    resetGame();
                 }
             });
 
             function resetGame() {
                 // Resets the game state
-                wallCollisionCount = 0; // Reset wall collision count
-                collisionCount = 0; // Reset collision count
-                score = 0; // Reset score
+                wallCollisionCount = 0;
+                collisionCount = 0;
+                score = 0;
                 dots = []; // Clear existing dots
-                spawnDots(); // Spawn new dots
+                clearInterval(dotInterval); // Clear previous dot interval
+                spawnDot(); // Spawn initial dots
+                dotInterval = setInterval(spawnDot, 2000); // Restart dot spawning
                 centerX1 = width / 2; // Reset player ball position
                 centerY1 = height / 2;
                 velocityX1 = 0; // Reset velocities
                 velocityY1 = 0;
                 document.getElementById("scoreDisplay").innerText = score; // Update display
+                document.getElementById("wallCollisions").innerText = wallCollisionCount; // Update wall collision count
             }
         }
     </script>
