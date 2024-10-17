@@ -1,0 +1,130 @@
+<script>
+    window.onload = function() {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var width = canvas.width = window.innerWidth;
+        var height = canvas.height = window.innerHeight;
+        var radius = 30;
+        var centerX1 = width / 2;
+        var centerY1 = height / 2;
+        var centerX2 = Math.random() * (width - radius * 2) + radius;
+        var centerY2 = Math.random() * (height - radius * 2) + radius;
+        var velocityX1 = 0, velocityY1 = 0;
+        var gravityX1 = 0, gravityY1 = 0;
+        var bounce = 0.8, friction = 0.99;
+        var collisionCount = 0, wallCollisionCount = 0;
+        var dots = [];
+        var numDots = 5; // Number of neon green dots
+        var score = 0;
+
+        // Load high score from local storage
+        var highScore = localStorage.getItem('highScore') || 0;
+        document.getElementById("highScore").innerText = highScore;
+
+        // Function to spawn random dots
+        function spawnDots() {
+            for (var i = 0; i < numDots; i++) {
+                dots.push({
+                    x: Math.random() * (width - radius * 2) + radius,
+                    y: Math.random() * (height - radius * 2) + radius,
+                    collected: false
+                });
+            }
+        }
+
+        // Initial dot spawning
+        spawnDots();
+
+        var myVar = setInterval(animation, 20);
+
+        function animation() {
+            // Check for wall collisions
+            if (centerX1 >= width - radius || centerX1 <= radius) {
+                velocityX1 = -velocityX1 * bounce;
+                centerX1 = Math.max(radius, Math.min(centerX1, width - radius));
+                wallCollisionCount++;
+            }
+            if (centerY1 >= height - radius || centerY1 <= radius) {
+                velocityY1 = -velocityY1 * bounce;
+                centerY1 = Math.max(radius, Math.min(centerY1, height - radius));
+                wallCollisionCount++;
+            }
+
+            // Refresh the game if wall collisions exceed 10
+            if (wallCollisionCount > 10) {
+                location.reload(); // Refresh the entire tab
+                return; // Exit the animation function
+            }
+
+            // Update ball positions
+            centerX1 += velocityX1;
+            centerY1 += velocityY1;
+
+            // Check for collision with the blue ball
+            if (Math.sqrt(Math.pow(centerX1 - centerX2, 2) + Math.pow(centerY1 - centerY2, 2)) < radius * 2) {
+                collisionCount += 10; // Score 10 for hitting the blue ball
+                centerX2 = Math.random() * (width - radius * 2) + radius;
+                centerY2 = Math.random() * (height - radius * 2) + radius;
+            }
+
+            // Check for collision with neon green dots
+            dots.forEach(dot => {
+                if (!dot.collected && Math.sqrt(Math.pow(centerX1 - dot.x, 2) + Math.pow(centerY1 - dot.y, 2)) < radius) {
+                    dot.collected = true;
+                    score += 1; // Score 1 for collecting a dot
+                }
+            });
+
+            // Apply gravity and friction
+            velocityX1 = (velocityX1 + gravityX1) * friction;
+            velocityY1 = (velocityY1 + gravityY1) * friction;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the player-controlled ball
+            ctx.beginPath();
+            ctx.arc(centerX1, centerY1, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = `hsla(180, 100%, 50%, 1)`;
+            ctx.shadowColor = 'hsla(180, 100%, 50%, 0.8)';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+
+            // Draw the target ball
+            ctx.beginPath();
+            ctx.arc(centerX2, centerY2, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#007399';
+            ctx.fill();
+
+            // Draw neon green dots
+            dots.forEach(dot => {
+                if (!dot.collected) {
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, radius / 2, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'lime'; // Use neon green color
+                    ctx.fill();
+                }
+            });
+
+            // Draw a line to the target ball
+            ctx.beginPath();
+            ctx.moveTo(centerX1, centerY1);
+            ctx.lineTo(centerX2, centerY2);
+            ctx.strokeStyle = 'cyan';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Update statistics on the screen
+            document.getElementById("wallCollisions").innerText = wallCollisionCount;
+            document.getElementById("ballHits").innerText = collisionCount;
+            document.getElementById("dotsCollected").innerText = score;
+        }
+
+        canvas.addEventListener('mousemove', function(e) {
+            var mouseX = e.clientX;
+            var mouseY = e.clientY;
+            gravityX1 = ((mouseX - width / 2) / (width / 2)) / 2;
+            gravityY1 = ((mouseY - height / 2) / (height / 2)) / 2;
+        });
+    }
+</script>
