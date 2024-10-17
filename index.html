@@ -52,7 +52,7 @@
 
             // Refresh the game if wall collisions exceed 10
             if (wallCollisionCount > 10) {
-                location.reload(); // Refresh the entire tab
+                resetGame(); // Call resetGame instead of location.reload
                 return; // Exit the animation function
             }
 
@@ -106,10 +106,10 @@
                 }
             });
 
-            // Draw a line to the target ball
+            // Draw a line to the mouse position
             ctx.beginPath();
             ctx.moveTo(centerX1, centerY1);
-            ctx.lineTo(centerX2, centerY2);
+            ctx.lineTo(mouseX, mouseY); // Attach line to mouse
             ctx.strokeStyle = 'cyan';
             ctx.lineWidth = 2;
             ctx.stroke();
@@ -120,11 +120,37 @@
             document.getElementById("dotsCollected").innerText = score;
         }
 
+        var mouseX = width / 2; // Initialize mouseX
+        var mouseY = height / 2; // Initialize mouseY
+
         canvas.addEventListener('mousemove', function(e) {
-            var mouseX = e.clientX;
-            var mouseY = e.clientY;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
             gravityX1 = ((mouseX - width / 2) / (width / 2)) / 2;
             gravityY1 = ((mouseY - height / 2) / (height / 2)) / 2;
         });
+
+        // Reset game on key press 'R' or 'r'
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' || e.key === 'R') {
+                resetGame(); // Reset the game if 'R' or 'r' is pressed
+            }
+        });
+
+        function resetGame() {
+            // Resets the game state
+            wallCollisionCount = 0; // Reset wall collision count
+            collisionCount = 0; // Reset collision count
+            score = 0; // Reset score
+            dots = []; // Clear existing dots
+            spawnDots(); // Spawn new dots
+            centerX1 = width / 2; // Reset player ball position
+            centerY1 = height / 2;
+            velocityX1 = 0; // Reset velocities
+            velocityY1 = 0;
+            document.getElementById("wallCollisions").innerText = wallCollisionCount; // Update display
+            document.getElementById("ballHits").innerText = collisionCount;
+            document.getElementById("dotsCollected").innerText = score;
+        }
     }
 </script>
