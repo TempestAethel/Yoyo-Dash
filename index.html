@@ -104,16 +104,16 @@
             var highScore = localStorage.getItem('highScore') || 0;
             document.getElementById("highScore").innerText = highScore;
 
-            // Function to spawn random dots
             function spawnDot() {
-                if (dots.length < 10) { // Limit to 10 dots on the canvas
-                    dots.push({
-                        x: Math.random() * (width - radius * 2) + radius,
-                        y: Math.random() * (height - radius * 2) + radius,
-                        collected: false
-                    });
-                }
-            }
+    if (dots.length < 20) { // Limit to 20 dots on the canvas
+        dots.push({
+            x: Math.random() * (width - radius * 2) + radius,
+            y: Math.random() * (height - radius * 2) + radius,
+            collected: false
+        });
+    }
+}
+
 
             dotInterval = setInterval(spawnDot, 2000); // Spawn a dot every 2 seconds
 
